@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>人狗歲數換算計算機</title>
+
+    <!-- ===== CSS：樣式美化 ===== -->
+    <style>
+        body {
+            background: #fafafa;
+            font-family: "Microsoft JhengHei", sans-serif;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: auto;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #444;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input[type="date"] {
+            flex: 1;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 10px 18px;
+            background: #4CAF50;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: #eef7ff;
+            border-radius: 8px;
+            border-left: 4px solid #4ba3ff;
+        }
+
+        .note {
+            font-size: 13px;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HTML：主內容 ===== -->
+<div class="container">
+    <h1>🐶 人狗歲數換算計算機</h1>
+
+    <p>請輸入狗狗的 <strong>出生年月日</strong>：</p>
+
+    <div class="input-group">
+        <input type="date" id="birthDate">
+        <button id="calcBtn">開始計算</button>
+    </div>
+
+    <div id="result" class="result-box" style="display:none;">
+        <h2>📘 計算結果</h2>
+        <p id="dogAgeYears"></p>
+        <p id="humanAge"></p>
+        <p class="note">（採用公式：人類年齡 = 16 × ln(狗狗年齡) + 31）</p>
+    </div>
+</div>
+
+<!-- ===== JavaScript：計算邏輯 ===== -->
+<script>
+    // 早安毛健康公式：人類年齡 = 16 × ln(狗狗年齡) + 31
+    document.getElementById("calcBtn").addEventListener("click", function() {
+        
+        const birthDate = document.getElementById("birthDate").value;
+        if (!birthDate) {
+            alert("請先輸入狗狗的出生年月日！");
+            return;
+        }
+
+        const today = new Date();
+        const bday = new Date(birthDate);
+
+        // 計算狗狗真實年齡（以年為單位）
+        let dogYears = (today - bday) / (1000 * 60 * 60 * 24 * 365);
+
+        if (dogYears < 0) {
+            alert("出生日期不能是未來！");
+            return;
+        }
+
+        // 人類年齡換算公式（自然對數 ln）
+        const humanAge = 16 * Math.log(dogYears) + 31;
+
+        document.getElementById("dogAgeYears").innerText = 
+            `🐕 狗狗目前的年齡：約 ${dogYears.toFixed(2)} 歲`;
+
+        document.getElementById("humanAge").innerText = 
+            `👤 換算成人類：約 ${humanAge.toFixed(1)} 歲`;
+
+        document.getElementById("result").style.display = "block";
+    });
+</script>
+
+</body>
+</html>
