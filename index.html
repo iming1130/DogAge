@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>毛小孩年齡計算機</title>
+    <title>人狗歲數換算計算機（升級版）</title>
 
-    <!-- ===== CSS：樣式美化 ===== -->
     <style>
         body {
             background: #fafafa;
@@ -14,7 +13,7 @@
         }
 
         .container {
-            max-width: 480px;
+            max-width: 520px;
             margin: auto;
             background: #fff;
             padding: 25px;
@@ -30,15 +29,16 @@
 
         .input-group {
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 12px;
             margin-bottom: 20px;
         }
 
-        input[type="date"] {
-            flex: 1;
+        input[type="date"], select {
             padding: 10px;
             border-radius: 6px;
             border: 1px solid #ccc;
+            width: 100%;
         }
 
         button {
@@ -72,14 +72,26 @@
 </head>
 <body>
 
-<!-- ===== HTML：主內容 ===== -->
 <div class="container">
-    <h1>🐶 人狗歲數換算計算機</h1>
+    <h1>🐶 人狗歲數換算計算機（升級版）</h1>
 
-    <p>請輸入狗狗的 <strong>出生年月日</strong>：</p>
+    <p>請輸入資訊：</p>
 
     <div class="input-group">
+
+        <!-- 出生日期 -->
+        <label>🐕 狗狗出生年月日：</label>
         <input type="date" id="birthDate">
+
+        <!-- 體型 -->
+        <label>⚖️ 狗狗體型：</label>
+        <select id="dogSize">
+            <option value="1.00">小型犬（≤10kg）</option>
+            <option value="0.95">中型犬（11–25kg）</option>
+            <option value="0.90">大型犬（26–40kg）</option>
+            <option value="0.85">巨型犬（>40kg）</option>
+        </select>
+
         <button id="calcBtn">開始計算</button>
     </div>
 
@@ -87,16 +99,31 @@
         <h2>📘 計算結果</h2>
         <p id="dogAgeYears"></p>
         <p id="humanAge"></p>
-        <p class="note">（採用公式：人類年齡 = 16 × ln(狗狗年齡) + 31）</p>
+        <p class="note">（公式：第 1 年=15、第 2 年=9、之後每年=5，再依體型調整）</p>
     </div>
 </div>
 
-<!-- ===== JavaScript：計算邏輯 ===== -->
 <script>
-    // 早安毛健康公式：人類年齡 = 16 × ln(狗狗年齡) + 31
+    // ========== 載入 localStorage ==========
+    window.onload = function () {
+        const saved = localStorage.getItem("dog-age-data");
+        if (saved) {
+            const data = JSON.parse(saved);
+
+            document.getElementById("birthDate").value = data.birthDate;
+            document.getElementById("dogSize").value = data.size;
+
+            // 顯示記錄的結果
+            showResult(data.dogYears, data.humanYears);
+        }
+    };
+
+    // ========== 主計算函式 ==========
     document.getElementById("calcBtn").addEventListener("click", function() {
         
         const birthDate = document.getElementById("birthDate").value;
+        const sizeFactor = parseFloat(document.getElementById("dogSize").value);
+
         if (!birthDate) {
             alert("請先輸入狗狗的出生年月日！");
             return;
@@ -105,7 +132,6 @@
         const today = new Date();
         const bday = new Date(birthDate);
 
-        // 計算狗狗真實年齡（以年為單位）
         let dogYears = (today - bday) / (1000 * 60 * 60 * 24 * 365);
 
         if (dogYears < 0) {
@@ -113,17 +139,44 @@
             return;
         }
 
-        // 人類年齡換算公式（自然對數 ln）
-        const humanAge = 16 * Math.log(dogYears) + 31;
+        // ===== 換算成「人類年齡」：新版公式 =====
+        let humanAge = 0;
 
-        document.getElementById("dogAgeYears").innerText = 
-            `🐕 狗狗目前的年齡：約 ${dogYears.toFixed(2)} 歲`;
+        if (dogYears <= 1) {
+            humanAge = dogYears * 15;
+        } else if (dogYears <= 2) {
+            humanAge = 15 + (dogYears - 1) * 9;
+        } else {
+            humanAge = 15 + 9 + (dogYears - 2) * 5;
+        }
 
-        document.getElementById("humanAge").innerText = 
-            `👤 換算成人類：約 ${humanAge.toFixed(1)} 歲`;
+        // 套用體型係數
+        humanAge = humanAge * sizeFactor;
+
+        // 顯示結果
+        showResult(dogYears, humanAge);
+
+        // ===== 保存至 localStorage =====
+        const saveData = {
+            birthDate: birthDate,
+            size: sizeFactor,
+            dogYears: dogYears,
+            humanYears: humanAge
+        };
+
+        localStorage.setItem("dog-age-data", JSON.stringify(saveData));
+    });
+
+    // ========== 顯示結果函式 ==========
+    function showResult(dogYears, humanAge) {
+        document.getElementById("dogAgeYears").innerText =
+            `🐕 狗狗目前年齡：約 ${dogYears.toFixed(2)} 歲`;
+
+        document.getElementById("humanAge").innerText =
+            `👤 換算成人類：約 ${humanAge.toFixed(1)} 歲（依體型調整後）`;
 
         document.getElementById("result").style.display = "block";
-    });
+    }
 </script>
 
 </body>
